@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Gastos Pessoais</title>
+  <style>
+    /* Reset básico e fonte moderna */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f0f2f5;
+      color: #1f2937;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Cartão central do formulário */
+    .container {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    p.subtitulo {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    .grupo-campo {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #f9fafb;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #10b981;
+      background-color: #ffffff;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background-color: #059669;
+    }
+
+    button:active {
+      transform: scale(0.99);
+    }
+
+    /* Estilo quando o botão está desabilitado durante o envio */
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Área de mensagens de feedback */
+    #mensagem {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      font-weight: 500;
+      display: none; /* Começa escondida */
+    }
+
+    .sucesso {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .erro {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>💸 Novo Gasto</h1>
+    <p class="subtitulo">Registre suas despesas direto na planilha</p>
+
+    <form id="formGastos">
+      <div class="grupo-campo">
+        <label for="descricao">Descrição</label>
+        <input type="text" id="descricao" placeholder="Ex: Almoço no restaurante" required>
+      </div>
+
+      <div class="grupo-campo">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" required>
+          <option value="" disabled selected>Selecione uma categoria...</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Lazer">Lazer</option>
+          <option value="Estudos">Estudos</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <div class="grupo-campo">
+        <label for="valor">Valor (R$)</label>
+        <input type="number" id="valor" step="0.01" min="0.01" placeholder="Ex: 35.50" required>
+      </div>
+
+      <button type="submit" id="btnSalvar">Salvar Gasto</button>
+    </form>
+
+    <div id="mensagem"></div>
+  </div>
+
+  <script>
+    // Cole abaixo a URL gerada na implantação do Google Apps Script
+    const SCRIPT_URL = "COLE_AQUI_A_URL_DO_APP_SCRIPT";
+
+    // Pegando os elementos da tela para manipular via JavaScript
+    const form = document.getElementById("formGastos");
+    const btnSalvar = document.getElementById("btnSalvar");
+    const divMensagem = document.getElementById("mensagem");
+
+    // Escuta o evento de envio (submit) do formulário
+    form.addEventListener("submit", async function(evento) {
+      // Impede que a página recarregue ao clicar no botão
+      evento.preventDefault();
+
+      // Verifica se o usuário lembrou de trocar a URL
+      if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxm8k9zSOIHzLREIqVpNRmplS-UaPnn19H2_JM1sMeSaudrgX7WYKPP5YLzLLo2-wqW/exec" || SCRIPT_URL.trim() === "") {
+        mostrarMensagem("Você precisa colar a URL do Apps Script no código antes de enviar!", "erro");
+        return;
+      }
+
+      // 1. Prepara a interface para o envio (desabilita o botão)
+      btnSalvar.disabled = true;
+      btnSalvar.textContent = "Salvando...";
+      divMensagem.style.display = "none";
+
+      // 2. Coleta os valores digitados nos campos
+      const dadosGasto = {
+        descricao: document.getElementById("descricao").value.trim(),
+        categoria: document.getElementById("categoria").value,
+        valor: document.getElementById("valor").value
+      };
+
+      try {
+        // 3. Envia os dados para o Google Apps Script usando fetch()
+        const resposta = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(dadosGasto)
+        });
+
+        // Lê a resposta enviada pelo Apps Script
+        const resultado = await resposta.json();
+
+        if (resultado.status === "sucesso") {
+          mostrarMensagem("Gasto salvo na planilha com sucesso!", "sucesso");
+          form.reset(); // Limpa todos os campos do formulário
+        } else {
+          throw new Error(resultado.mensagem || "Erro desconhecido no servidor.");
+        }
+
+      } catch (erro) {
+        console.error("Erro na requisição:", erro);
+        mostrarMensagem("Não foi possível salvar. Verifique sua conexão ou a URL do script."https://script.google.com/macros/s/AKfycbxm8k9zSOIHzLREIqVpNRmplS-UaPnn19H2_JM1sMeSaudrgX7WYKPP5YLzLLo2-wqW/exec);
+      } finally {
+        // 4. Independentemente de dar certo ou errado, reativa o botão
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = "Salvar Gasto";
+      }
+    });
+
+    // Função auxiliar para exibir mensagens coloridas na tela
+    function mostrarMensagem(texto, tipo) {
+      divMensagem.textContent = texto;
+      divMensagem.className = tipo; // Aplica a classe 'sucesso' ou 'erro'
+      divMensagem.style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
