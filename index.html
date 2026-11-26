@@ -165,7 +165,7 @@
 
   <script>
     // Cole abaixo a URL gerada na implantação do Google Apps Script
-    const SCRIPT_URL = "COLE_AQUI_A_URL_DO_APP_SCRIPT";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm8k9zSOIHzLREIqVpNRmplS-UaPnn19H2_JM1sMeSaudrgX7WYKPP5YLzLLo2-wqW/exec";
 
     // Pegando os elementos da tela para manipular via JavaScript
     const form = document.getElementById("formGastos");
@@ -178,7 +178,7 @@
       evento.preventDefault();
 
       // Verifica se o usuário lembrou de trocar a URL
-      if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxm8k9zSOIHzLREIqVpNRmplS-UaPnn19H2_JM1sMeSaudrgX7WYKPP5YLzLLo2-wqW/exec" || SCRIPT_URL.trim() === "") {
+      if (SCRIPT_URL === "COLE_AQUI_A_URL_DO_APP_SCRIPT" || SCRIPT_URL.trim() === "") {
         mostrarMensagem("Você precisa colar a URL do Apps Script no código antes de enviar!", "erro");
         return;
       }
@@ -217,7 +217,7 @@
 
       } catch (erro) {
         console.error("Erro na requisição:", erro);
-        mostrarMensagem("Não foi possível salvar. Verifique sua conexão ou a URL do script."https://script.google.com/macros/s/AKfycbxm8k9zSOIHzLREIqVpNRmplS-UaPnn19H2_JM1sMeSaudrgX7WYKPP5YLzLLo2-wqW/exec);
+        mostrarMensagem("Não foi possível salvar. Verifique sua conexão ou a URL do script.", "erro");
       } finally {
         // 4. Independentemente de dar certo ou errado, reativa o botão
         btnSalvar.disabled = false;
